@@ -6,6 +6,10 @@ on:
     branches:
       - main
 
+env:
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
 # ジョブを定義
 jobs:
   build:
