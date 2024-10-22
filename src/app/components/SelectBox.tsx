@@ -9,22 +9,22 @@ type OptionType = {
 interface SelectBoxProps {
   options: OptionType[];
   selectedValue: OptionType;
-  //onChange: (value: OptionType | null) => void;
+  onChange: (value: OptionType | null) => void;
 }
 
 const SelectBox: React.FC<SelectBoxProps> = ({
   options,
   selectedValue,
-  //onChange,
+  onChange,
 }) => {
   return (
     <div style={{ width: "400px", margin: "30px" }}>
       <Select
         options={options}
         defaultValue={selectedValue}
-        // onChange={(value) => {
-        //   onChange(value as OptionType | null);
-        // }} // 選択変更時に親に通知
+        onChange={(value) => {
+          onChange(value as OptionType | null);
+        }} // 選択変更時に親に通知
       />
     </div>
   );

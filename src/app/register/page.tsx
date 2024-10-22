@@ -18,7 +18,7 @@ import {
   LiaGrinSquint,
 } from "react-icons/lia";
 import SelectBox from "../components/SelectBox";
-import { addMotivation } from "@/utils/supabaseFunctions";
+import { addMotivation } from "../../../pages";
 
 interface Event {
   title: string;
@@ -139,15 +139,17 @@ export default function RegisterPage() {
     });
   };
 
-  // function handleSelectChange(value: OptionType | null) {
-  //   if (value) {
-  //     setSelectedValue(value);
-  //   }
-  // }
+  function handleSelectChange(value: OptionType | null) {
+    if (value) {
+      setSelectedValue(value);
+    }
+    console.log(value);
+  }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const value = selectedValue.value;
+    console.log(value);
     if (value) {
       const selectedOption = options.find((option) => option.value === value);
       if (selectedOption) {
@@ -350,14 +352,15 @@ export default function RegisterPage() {
                         >
                           Add Motivation
                         </Dialog.Title>
-                        <div className="mt-2">
-                          <SelectBox
-                            options={options}
-                            selectedValue={selectedValue}
-                            //onChange={handleSelectChange}
-                          />
-                        </div>
                         <form action="submit" onSubmit={handleSubmit}>
+                          <div className="mt-2">
+                            <SelectBox
+                              options={options}
+                              selectedValue={selectedValue}
+                              onChange={handleSelectChange}
+                            />
+                          </div>
+
                           {/* <div className="mt-2">
                             <input
                               type="text"
