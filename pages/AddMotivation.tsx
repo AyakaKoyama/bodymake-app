@@ -10,5 +10,5 @@ export default async function AddMotivation(value: string) {
   });
 
   const data = await res.json();
-  return data;
+  return data[0];
 }
