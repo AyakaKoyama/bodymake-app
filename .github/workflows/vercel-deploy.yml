@@ -9,6 +9,7 @@ on:
 env:
   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
   SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+  API_URL: ${{ secrets.API_URL }}
 
 # ジョブを定義
 jobs:
