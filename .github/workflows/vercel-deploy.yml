@@ -21,20 +21,18 @@ jobs:
         with:
           node-version: "20" # nodeのバージョン20を指定
 
-      # test.txtファイルを生成する(Next.jsではこの工程が必要)
-      - name: Create test.txt file
+      # .envファイルを生成する(Next.jsではこの工程が必要)
+      - name: Create .env file
         run: |
-          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> test.txt
-          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> test.txt
-        # test.txtの内容を出力して確認 (test)
-      - name: Output test.txt file for test
-        run: cat test.txt
-        # test.txtファイルをアーティファクトとして保存
-      - name: Upload test.txt as artifact
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
+
+        # .envをアーティファクトとして保存
+      - name: Upload .env as artifact
         uses: actions/upload-artifact@v3
         with:
           name: test-secrets
-          path: test.txt
+          path: .env
 
       - name: Install dependencies
         run: npm install # 依存関係をインストール
