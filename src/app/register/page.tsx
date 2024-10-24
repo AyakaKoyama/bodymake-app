@@ -18,7 +18,7 @@ import {
   LiaGrinSquint,
 } from "react-icons/lia";
 import SelectBox from "../components/SelectBox";
-import addMotivation from "../../../pages/AddMotivation";
+import addMotivation from "../utils/AddMotivation";
 
 interface Event {
   title: string;

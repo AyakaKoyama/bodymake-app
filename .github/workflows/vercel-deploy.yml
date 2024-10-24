@@ -32,7 +32,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: test-secrets
-          path: .env
+          path: ./env
 
       - name: Install dependencies
         run: npm install # 依存関係をインストール
