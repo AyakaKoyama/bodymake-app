@@ -28,7 +28,28 @@ jobs:
           echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
 
       - name: Install dependencies
-        run: npm install # 依存関係をインストール
+        run:
+          npm install # 依存関係をインストール
+
+
+          # 環境変数の存在を確認する(テスト用)
+      - name: Check if Supabase environment variables are set
+        run: |
+          if [ -z "$SUPABASE_URL" ]; then
+          echo "SUPABASE_URL is not set"
+          exit 1
+          else
+          echo "SUPABASE_URL is set"
+          fi
+          if [ -z "$SUPABASE_KEY" ]; then
+          echo "SUPABASE_KEY is not set"
+          exit 1
+          else
+          echo "SUPABASE_KEY is set"
+          fi
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
 
       - name: Build Next.js project
         env:
