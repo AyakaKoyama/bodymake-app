@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 # ジョブを定義
 jobs:
@@ -20,13 +21,19 @@ jobs:
         with:
           node-version: "20" # nodeのバージョン20を指定
 
+        # .envファイルを生成する(Next.jsではこの工程が必要)
+      - name: Create .env file
+        run: |
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
+
       - name: Install dependencies
         run: npm install # 依存関係をインストール
 
       - name: Build Next.js project
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: npm run build # ビルドする
 
       - name: Deploy to Vercel
