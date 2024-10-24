@@ -21,35 +21,23 @@ jobs:
         with:
           node-version: "20" # nodeのバージョン20を指定
 
-        # .envファイルを生成する(Next.jsではこの工程が必要)
-      - name: Create .env file
+      #   # .envファイルを生成する(Next.jsではこの工程が必要)
+      # - name: Create .env file
+      #   run: |
+      #     echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+      #     echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
+
+      # .envの中身を表示(test)
+      - name: Print Test .env variables
         run: |
-          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
-          echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
-
-      - name: Install dependencies
-        run:
-          npm install # 依存関係をインストール
-
-
-          # 環境変数の存在を確認する(テスト用)
-      - name: Check if Supabase environment variables are set
-        run: |
-          if [ -z "$SUPABASE_URL" ]; then
-          echo "SUPABASE_URL is not set"
-          exit 1
-          else
-          echo "SUPABASE_URL is set"
-          fi
-          if [ -z "$SUPABASE_KEY" ]; then
-          echo "SUPABASE_KEY is not set"
-          exit 1
-          else
-          echo "SUPABASE_KEY is set"
-          fi
+          echo "SUPABASE_URL: $SUPABASE_URL"
+          echo "SUPABASE_KEY: $SUPABASE_KEY"
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+      - name: Install dependencies
+        run: npm install # 依存関係をインストール
 
       - name: Build Next.js project
         env:
