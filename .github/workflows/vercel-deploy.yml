@@ -29,6 +29,12 @@ jobs:
         # test.txtの内容を出力して確認 (test)
       - name: Output test.txt file for test
         run: cat test.txt
+        # test.txtファイルをアーティファクトとして保存
+      - name: Upload test.txt as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-secrets
+          path: test.txt
 
       - name: Install dependencies
         run: npm install # 依存関係をインストール
