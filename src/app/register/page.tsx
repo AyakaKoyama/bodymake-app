@@ -19,19 +19,22 @@ import {
 } from "react-icons/lia";
 import SelectBox from "../components/SelectBox";
 import addMotivation from "../utils/AddMotivation";
+import showMotivation from "../utils/showMotivation";
 
 interface Event {
   title: string;
   start: Date | string;
   allDay: boolean;
   id: number;
+  // アイコンを追加
+  icon: JSX.Element;
 }
 interface OptionType {
   value: string;
   label: JSX.Element;
 }
 
-//SelectBoxコンポーネントのoptions
+//SelectBoxコンポーネントの表示内容
 const options = [
   {
     value: "happy",
@@ -55,6 +58,17 @@ const options = [
   },
 ];
 
+//表示用
+const iconMap: {
+  [key in "happy" | "good" | "normal" | "better" | "bad"]: JSX.Element;
+} = {
+  happy: <LiaGrinSquint size={24} />,
+  good: <LiaGrinBeam />,
+  normal: <LiaGrin />,
+  better: <LiaFrown />,
+  bad: <LiaDizzy />,
+};
+
 export default function RegisterPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [events, setEvents] = useState<Event[]>([]);
@@ -67,6 +81,7 @@ export default function RegisterPage() {
     start: "",
     allDay: false,
     id: 0,
+    icon: <></>,
   });
   //SelectBoxコンポーネントのselectedValue
   const [selectedValue, setSelectedValue] = useState<OptionType>(options[0]);
@@ -84,6 +99,25 @@ export default function RegisterPage() {
         },
       });
     }
+    //アイコン表示
+    const getMotivation = async () => {
+      const data = await showMotivation();
+      console.log(data);
+
+      // 例: dataは配列で、各要素が{value: "happy", ...}のような形であると仮定
+      const eventWithIcons = data.map(
+        (item: { value: string; created_at: string }, index: number) => ({
+          id: index, // ユニークなIDを設定
+          title: item.value, // タイトルを設定
+          start: item.created_at, // 開始日を現在の日付に設定
+          allDay: true, // 終日イベントにする
+          icon: iconMap[item.value as keyof typeof iconMap], // アイコンをマッピング
+        })
+      );
+
+      setAllEvents((prevEvents) => [...prevEvents, ...eventWithIcons]);
+    };
+    getMotivation();
   }, []);
 
   function handleDateClick(arg: { date: Date; allDay: boolean }) {
@@ -103,6 +137,7 @@ export default function RegisterPage() {
       title: data.draggedEl.innerText,
       allDay: data.allDay,
       id: new Date().getTime(),
+      icon: selectedValue.label, // ここでアイコンを関連付け
     };
     setAllEvents([...allEvents, event]);
   }
@@ -127,6 +162,7 @@ export default function RegisterPage() {
       start: "",
       allDay: false,
       id: 0,
+      icon: <></>,
     });
     setShowDeleteModal(false);
     setIdToDelete(null);
@@ -162,6 +198,11 @@ export default function RegisterPage() {
     console.log(selectedValue);
   }
 
+  // カレンダーのレンダリング時にアイコンを表示
+  const eventRender = ({ event }: { event: Event }) => {
+    return <div>{event.icon}</div>;
+  };
+
   return (
     <>
       <nav className="flex justify-between mb-12 border-b border-green-100 p-4">
@@ -178,12 +219,14 @@ export default function RegisterPage() {
                 right: "resourceTimelineWook, dayGridMonth,timeGridWeek",
               }}
               events={allEvents as EventSourceInput}
+              eventContent={eventRender}
               nowIndicator={true}
               editable={true}
               droppable={true}
               selectable={true}
               selectMirror={true}
               dateClick={handleDateClick}
+              // カレンダー上でイベント登録
               drop={(data) => addEvent(data)}
               eventClick={(data) => handleDeleteModal(data)}
             />
@@ -209,7 +252,13 @@ export default function RegisterPage() {
                     ...events,
                     { ...newEvent, id: new Date().getTime() },
                   ]);
-                  setNewEvent({ title: "", start: "", allDay: false, id: 0 });
+                  setNewEvent({
+                    title: "",
+                    start: "",
+                    allDay: false,
+                    id: 0,
+                    icon: <></>,
+                  });
                 }}
                 disabled={!newEvent.title}
               >

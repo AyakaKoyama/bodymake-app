@@ -9,11 +9,6 @@ export default async function AddMotivation(value: string) {
     body: JSON.stringify({ value }),
   });
   const data = await res.json();
-  // テスト用の固定データを返す
-  // const data = {
-  //   message: "succsess",
-  //   success: true,
-  // };
 
   return data;
 }

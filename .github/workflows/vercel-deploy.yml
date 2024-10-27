@@ -27,13 +27,6 @@ jobs:
           echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
           echo "SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}" >> .env
 
-        # .envをアーティファクトとして保存
-      - name: Upload .env as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-secrets
-          path: ./env
-
       - name: Install dependencies
         run: npm install # 依存関係をインストール
 
