@@ -25,3 +25,17 @@ body {
     text-wrap: balance;
   }
 }
+.fc-daygrid-event {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px; /* アイコンの余白を調整 */
+}
+
+.fc-event-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}

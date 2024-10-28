@@ -38,23 +38,23 @@ interface OptionType {
 const options = [
   {
     value: "happy",
-    label: <LiaGrinSquint />,
+    label: <LiaGrinSquint className="w-6 h-6" />,
   },
   {
     value: "good",
-    label: <LiaGrinBeam />,
+    label: <LiaGrinBeam className="w-6 h-6" />,
   },
   {
     value: "normal",
-    label: <LiaGrin />,
+    label: <LiaGrin className="w-6 h-6" />,
   },
   {
     value: "better",
-    label: <LiaFrown />,
+    label: <LiaFrown className="w-6 h-6" />,
   },
   {
     value: "bad",
-    label: <LiaDizzy />,
+    label: <LiaDizzy className="w-6 h-6" />,
   },
 ];
 
@@ -63,10 +63,10 @@ const iconMap: {
   [key in "happy" | "good" | "normal" | "better" | "bad"]: JSX.Element;
 } = {
   happy: <LiaGrinSquint size={24} />,
-  good: <LiaGrinBeam />,
-  normal: <LiaGrin />,
-  better: <LiaFrown />,
-  bad: <LiaDizzy />,
+  good: <LiaGrinBeam size={24} />,
+  normal: <LiaGrin size={24} />,
+  better: <LiaFrown size={24} />,
+  bad: <LiaDizzy size={24} />,
 };
 
 export default function RegisterPage() {
@@ -199,8 +199,15 @@ export default function RegisterPage() {
   }
 
   // カレンダーのレンダリング時にアイコンを表示
-  const eventRender = ({ event }: { event: Event }) => {
-    return <div>{event.icon}</div>;
+  const renderEventContent = (eventInfo: {
+    event: { extendedProps: { icon: JSX.Element }; title: string };
+  }) => {
+    // extendedPropsからiconを取得し、表示内容を定義
+    return (
+      <div className="fc-event-main flex items-center justify-center w-full h-full">
+        {eventInfo.event.extendedProps.icon}
+      </div>
+    );
   };
 
   return (
@@ -219,7 +226,7 @@ export default function RegisterPage() {
                 right: "resourceTimelineWook, dayGridMonth,timeGridWeek",
               }}
               events={allEvents as EventSourceInput}
-              eventContent={eventRender}
+              eventContent={renderEventContent}
               nowIndicator={true}
               editable={true}
               droppable={true}
