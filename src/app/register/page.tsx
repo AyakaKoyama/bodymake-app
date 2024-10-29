@@ -168,12 +168,12 @@ export default function RegisterPage() {
     setIdToDelete(null);
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setNewEvent({
-      ...newEvent,
-      title: e.target.value,
-    });
-  };
+  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  //   setNewEvent({
+  //     ...newEvent,
+  //     title: e.target.value,
+  //   });
+  // };
 
   function handleSelectChange(value: OptionType | null) {
     if (value) {
@@ -186,6 +186,20 @@ export default function RegisterPage() {
     e.preventDefault();
     const value = selectedValue.value;
     console.log(value);
+
+    // バリデーション
+    const today = new Date().toISOString().split("T")[0];
+    // 現在のイベントリストから今日のイベントをチェック
+    const hasTodayEvent = allEvents.some((event) => {
+      const eventDate = new Date(event.start).toISOString().split("T")[0];
+      return eventDate === today;
+    });
+    // 今日のイベントが既に登録されている場合はエラーメッセージを表示
+    if (hasTodayEvent) {
+      alert("本日はすでにモチベーションが登録されています。");
+      return;
+    }
+
     if (value) {
       const selectedOption = options.find((option) => option.value === value);
       if (selectedOption) {
@@ -213,7 +227,9 @@ export default function RegisterPage() {
   return (
     <>
       <nav className="flex justify-between mb-12 border-b border-green-100 p-4">
-        <h1 className="font-bold text-2xl text-white-700">Calendar</h1>
+        <h1 className="font-bold text-2xl text-white-700">
+          日付を押して登録しましょう
+        </h1>
       </nav>
       <main className="flex min-h-screen flex-col items-center justify-between p-24">
         <div className="grid grid-cols-10">
@@ -238,12 +254,12 @@ export default function RegisterPage() {
               eventClick={(data) => handleDeleteModal(data)}
             />
           </div>
-          <div
+          {/* <div
             id="draggable-el"
             className="ml-8 w-full border-2 p-2 rounded-md mt-16 lg:h-1/2 bg-orange-50"
           >
             <h1 className="font-bold text-lg text-center">Drag Event</h1>
-            {/* イベント手動で登録したい */}
+            
             <div className="mt-4">
               <input
                 type="text"
@@ -282,7 +298,7 @@ export default function RegisterPage() {
                 {event.title}
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
 
         <Transition.Root show={showDeleteModal} as={Fragment}>
