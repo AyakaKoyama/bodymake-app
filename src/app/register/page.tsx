@@ -6,9 +6,10 @@ import interactionPlugin, {
   DropArg,
 } from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import bootstrapPlugin from "@fullcalendar/bootstrap";
 import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { CheckIcon, ExclamationTriangleIcon } from "@heroicons/react/20/solid";
+import { ExclamationTriangleIcon } from "@heroicons/react/20/solid";
 import { EventSourceInput } from "@fullcalendar/core/index.js";
 import {
   LiaDizzy,
@@ -20,6 +21,8 @@ import {
 import SelectBox from "../components/SelectBox";
 import addMotivation from "../utils/AddMotivation";
 import showMotivation from "../utils/showMotivation";
+//globals.css import
+import "../globals.css";
 
 interface Event {
   title: string;
@@ -28,6 +31,7 @@ interface Event {
   id: number;
   // アイコンを追加
   icon: JSX.Element;
+  backgroundColor: string;
 }
 interface OptionType {
   value: string;
@@ -82,6 +86,7 @@ export default function RegisterPage() {
     allDay: false,
     id: 0,
     icon: <></>,
+    backgroundColor: "#ffffff",
   });
   //SelectBoxコンポーネントのselectedValue
   const [selectedValue, setSelectedValue] = useState<OptionType>(options[0]);
@@ -107,13 +112,14 @@ export default function RegisterPage() {
       // 例: dataは配列で、各要素が{value: "happy", ...}のような形であると仮定
       const eventWithIcons = data.map(
         (item: { value: string; created_at: string }, index: number) => ({
-          id: index, // ユニークなIDを設定
-          title: item.value, // タイトルを設定
+          id: index,
+          title: item.value,
           start: item.created_at, // 開始日を現在の日付に設定
           allDay: true, // 終日イベントにする
           icon: iconMap[item.value as keyof typeof iconMap], // アイコンをマッピング
         })
       );
+      console.log(eventWithIcons);
 
       setAllEvents((prevEvents) => [...prevEvents, ...eventWithIcons]);
     };
@@ -163,6 +169,7 @@ export default function RegisterPage() {
       allDay: false,
       id: 0,
       icon: <></>,
+      backgroundColor: "#ffffff",
     });
     setShowDeleteModal(false);
     setIdToDelete(null);
@@ -191,6 +198,7 @@ export default function RegisterPage() {
     const today = new Date().toISOString().split("T")[0];
     // 現在のイベントリストから今日のイベントをチェック
     const hasTodayEvent = allEvents.some((event) => {
+      console.log(event);
       const eventDate = new Date(event.start).toISOString().split("T")[0];
       return eventDate === today;
     });
@@ -218,7 +226,7 @@ export default function RegisterPage() {
   }) => {
     // extendedPropsからiconを取得し、表示内容を定義
     return (
-      <div className="fc-event-main flex items-center justify-center w-full h-full">
+      <div className="text-xs text-white bg-orange-300 rounded-full p-1">
         {eventInfo.event.extendedProps.icon}
       </div>
     );
@@ -226,16 +234,26 @@ export default function RegisterPage() {
 
   return (
     <>
-      <nav className="flex justify-between mb-12 border-b border-green-100 p-4">
-        <h1 className="font-bold text-2xl text-white-700">
-          日付を押して登録しましょう
-        </h1>
-      </nav>
-      <main className="flex min-h-screen flex-col items-center justify-between p-24">
-        <div className="grid grid-cols-10">
-          <div className="col-span-8">
+      <div className="p-6 bg-white-50 min-h-screen font-sans">
+        <div className="bg-white-50 p-8 rounded-lg shadow-lg max-w-4xl mx-auto">
+          <h2 className="text-xl font-medium text-center mb-6">
+            My Fitness Calendar
+          </h2>
+
+          <div className="flex justify-between items-center mb-6">
+            <button className="text-gray-700 hover:text-gray-900">&lt;</button>
+            <button className="text-gray-700 hover:text-gray-900">&gt;</button>
+          </div>
+
+          <div className="col-span-8 mb-6">
             <FullCalendar
-              plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
+              plugins={[
+                dayGridPlugin,
+                interactionPlugin,
+                timeGridPlugin,
+                bootstrapPlugin,
+              ]}
+              themeSystem="bootstrap5"
               headerToolbar={{
                 left: "prev,next today",
                 center: "title",
@@ -243,6 +261,7 @@ export default function RegisterPage() {
               }}
               events={allEvents as EventSourceInput}
               eventContent={renderEventContent}
+              eventDisplay="block"
               nowIndicator={true}
               editable={true}
               droppable={true}
@@ -252,227 +271,160 @@ export default function RegisterPage() {
               // カレンダー上でイベント登録
               drop={(data) => addEvent(data)}
               eventClick={(data) => handleDeleteModal(data)}
+              height="auto"
+              initialView="dayGridMonth"
             />
           </div>
-          {/* <div
-            id="draggable-el"
-            className="ml-8 w-full border-2 p-2 rounded-md mt-16 lg:h-1/2 bg-orange-50"
-          >
-            <h1 className="font-bold text-lg text-center">Drag Event</h1>
-            
-            <div className="mt-4">
-              <input
-                type="text"
-                className="border rounded p-2 w-full"
-                placeholder="Event Title"
-                value={newEvent.title}
-                onChange={handleChange}
-              />
-              <button
-                className="mt-2 bg-green-500 text-white p-2 rounded"
-                onClick={() => {
-                  setEvents([
-                    ...events,
-                    { ...newEvent, id: new Date().getTime() },
-                  ]);
-                  setNewEvent({
-                    title: "",
-                    start: "",
-                    allDay: false,
-                    id: 0,
-                    icon: <></>,
-                  });
-                }}
-                disabled={!newEvent.title}
-              >
-                Add Event
-              </button>
-            </div>
-
-            {events.map((event) => (
-              <div
-                className="fc-event border-2 p-1 m-2 w-full rounded-md ml-auto text-center bg-white"
-                title={event.title}
-                key={event.id}
-              >
-                {event.title}
-              </div>
-            ))}
-          </div> */}
         </div>
+      </div>
 
-        <Transition.Root show={showDeleteModal} as={Fragment}>
-          <Dialog
-            as="div"
-            className="relative z-10"
-            onClose={setShowDeleteModal}
+      <Transition.Root show={showDeleteModal} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={setShowDeleteModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
           >
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
-              <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-            </Transition.Child>
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
 
-            <div className="fixed inset-0 z-10 overflow-y-auto">
-              <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                <Transition.Child
-                  as={Fragment}
-                  enter="ease-out duration-300"
-                  enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                  enterTo="opacity-100 translate-y-0 sm:scale-100"
-                  leave="ease-in duration-200"
-                  leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-                  leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                >
-                  <Dialog.Panel
-                    className="relative transform overflow-hidden rounded-lg
+          <div className="fixed inset-0  overflow-y-auto">
+            <div className="flex items-center justify-center min-h-full p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <Dialog.Panel
+                  className="relative transform overflow-hidden rounded-lg
                    bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
-                  >
-                    <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                      <div className="sm:flex sm:items-start">
-                        <div
-                          className="mx-auto flex h-12 w-12 flex-shrink-0 items-center 
-                      justify-center rounded-full bg-orange-100 sm:mx-0 sm:h-10 sm:w-10"
-                        >
-                          <ExclamationTriangleIcon
-                            className="h-6 w-6 text-orange-600"
-                            aria-hidden="true"
-                          />
-                        </div>
-                        <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                          <Dialog.Title
-                            as="h3"
-                            className="text-base font-semibold leading-6 text-gray-900"
-                          >
-                            Delete Event
-                          </Dialog.Title>
-                          <div className="mt-2">
-                            <p className="text-sm text-gray-500">
-                              Are you sure you want to delete this event?
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                      <button
-                        type="button"
-                        className="inline-flex w-full justify-center rounded-md bg-orange-600 px-3 py-2 text-sm 
-                      font-semibold text-white shadow-sm hover:bg-orange-500 sm:ml-3 sm:w-auto"
-                        onClick={handleDelete}
-                      >
-                        Delete
-                      </button>
-                      <button
-                        type="button"
-                        className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 
-                      shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
-                        onClick={handleCloseModal}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </Dialog.Panel>
-                </Transition.Child>
-              </div>
-            </div>
-          </Dialog>
-        </Transition.Root>
-        <Transition.Root show={showModal} as={Fragment}>
-          <Dialog as="div" className="relative z-10" onClose={setShowModal}>
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
-              <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-            </Transition.Child>
-
-            <div className="fixed inset-0 z-10 overflow-y-auto">
-              <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                <Transition.Child
-                  as={Fragment}
-                  enter="ease-out duration-300"
-                  enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                  enterTo="opacity-100 translate-y-0 sm:scale-100"
-                  leave="ease-in duration-200"
-                  leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-                  leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 >
-                  <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:max-h-[90vh] sm:w-full sm:max-w-lg sm:p-6 ">
-                    <div className="overflow-y-auto max-h-[70vh]">
-                      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-                        <CheckIcon
-                          className="h-6 w-6 text-green-600"
+                  <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                    <div className="sm:flex sm:items-start">
+                      <div
+                        className="mx-auto flex h-24 w-24 flex-shrink-0 items-center 
+                        justify-center rounded-full bg-orange-100 sm:mx-0 sm:h-10 sm:w-10"
+                      >
+                        <ExclamationTriangleIcon
+                          className=" h-30 w-30 text-orange-300"
                           aria-hidden="true"
                         />
                       </div>
-                      <div className="mt-3 text-center sm:mt-5">
+                      <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
                         <Dialog.Title
                           as="h3"
                           className="text-base font-semibold leading-6 text-gray-900"
                         >
-                          Add Motivation
+                          削除
                         </Dialog.Title>
-                        <form action="submit" onSubmit={handleSubmit}>
-                          <div className="mt-2">
-                            <SelectBox
-                              options={options}
-                              selectedValue={selectedValue}
-                              onChange={handleSelectChange}
-                            />
-                          </div>
-
-                          {/* <div className="mt-2">
-                            <input
-                              type="text"
-                              name="title"
-                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 
-                            shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 
-                            focus:ring-2 
-                            focus:ring-inset focus:ring-green-600 
-                            sm:text-sm sm:leading-6"
-                              value={newEvent.title}
-                              onChange={(e) => handleChange(e)}
-                              placeholder="Motivation"
-                            ></input>
-                          </div> */}
-                          <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
-                            <button
-                              type="submit"
-                              className="inline-flex w-full justify-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 sm:col-start-2 disabled:opacity-25"
-                              disabled={selectedValue.value === ""}
-                            >
-                              登録
-                            </button>
-                            <button
-                              type="button"
-                              className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"
-                              onClick={handleCloseModal}
-                            >
-                              キャンセル
-                            </button>
-                          </div>
-                        </form>
+                        <div className="mt-2">
+                          <p className="text-sm text-gray-500">
+                            アイコンを削除します。よろしいですか？
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </Dialog.Panel>
-                </Transition.Child>
-              </div>
+                  </div>
+                  <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                    <button
+                      type="button"
+                      className="mt-3 inline-flex w-full justify-center rounded-md bg-orange-300 px-3 py-2 text-sm 
+                      font-semibold text-white shadow-sm hover:bg-orange-200 sm:ml-3 sm:w-auto"
+                      onClick={handleDelete}
+                    >
+                      削除
+                    </button>
+                    <button
+                      type="button"
+                      className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 
+                      shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                      onClick={handleCloseModal}
+                    >
+                      キャンセル
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
             </div>
-          </Dialog>
-        </Transition.Root>
-      </main>
+          </div>
+        </Dialog>
+      </Transition.Root>
+      <Transition.Root show={showModal} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={setShowModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-full p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md p-6 bg-white rounded-lg shadow-xl">
+                  <div className="overflow-y-auto max-h-[70vh]">
+                    <div className="mt-3 text-center sm:mt-5">
+                      <Dialog.Title
+                        as="h3"
+                        className="text-lg font-medium leading-6 text-gray-900 mb-4"
+                      >
+                        今日のモチベーションは？
+                      </Dialog.Title>
+                      <form action="submit" onSubmit={handleSubmit}>
+                        <div className="mt-2">
+                          <SelectBox
+                            options={options}
+                            selectedValue={selectedValue}
+                            onChange={handleSelectChange}
+                          />
+                        </div>
+
+                        <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
+                          <button
+                            type="submit"
+                            className="mt-3 inline-flex w-full justify-center rounded-md bg-emerald-400 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500 sm:col-start-2 disabled:opacity-25"
+                            disabled={selectedValue.value === ""}
+                          >
+                            登録
+                          </button>
+                          <button
+                            type="button"
+                            className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"
+                            onClick={handleCloseModal}
+                          >
+                            キャンセル
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
     </>
   );
 }

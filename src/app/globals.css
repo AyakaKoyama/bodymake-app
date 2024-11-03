@@ -1,23 +1,24 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.2.3/minty/bootstrap.min.css");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* fullcarender-Mintyテーマが持つ変数名と競合しないようにする */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --custom-background: #ffffff;
+  --custom-foreground: #171717;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --custom-background: #0a0a0a;
+    --custom-foreground: #ededed;
   }
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--custom-foreground);
+  background: var(--custom-background);
 }
 
 @layer utilities {
@@ -38,4 +39,17 @@ body {
   justify-content: center;
   height: 100%;
   width: 100%;
+}
+
+/* カレンダー内の各要素設定 */
+.fc .fc-button {
+  background-color: var(
+    --bs-primary
+  ) !important; /* Bootswatchテーマの変数使用 */
+}
+.fc-event {
+  background-color: #ffffff !important; /* イベントの背景色を白に */
+  color: #000000 !important; /* イベントのテキスト色を黒に */
+  border: none !important; /* イベント枠線があれば消す */
+  /* background-color: var(--bs-primary) !important; イベントの背景色 */
 }
