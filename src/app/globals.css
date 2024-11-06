@@ -1,4 +1,4 @@
-@import url("https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.2.3/minty/bootstrap.min.css");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.3/minty/bootstrap.min.css");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -42,7 +42,7 @@ body {
 }
 
 /* カレンダー内の各要素設定 */
-.fc .fc-button {
+.fc-button {
   background-color: var(
     --bs-primary
   ) !important; /* Bootswatchテーマの変数使用 */

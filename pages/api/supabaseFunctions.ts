@@ -7,13 +7,14 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    const { value } = req.body;
+    const { value, display_date } = req.body;
+    console.log(value, display_date);
 
     // supabaseを使用してデータを挿入
     try {
       const { data, error } = await supabase
         .from("motivation_bodymake")
-        .insert([{ value }]);
+        .insert([{ value, display_date }]);
 
       if (error) {
         return res.status(500).json({ error: error.message });

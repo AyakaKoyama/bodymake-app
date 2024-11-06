@@ -21,7 +21,6 @@ import {
 import SelectBox from "../components/SelectBox";
 import addMotivation from "../utils/AddMotivation";
 import showMotivation from "../utils/showMotivation";
-//globals.css import
 import "../globals.css";
 
 interface Event {
@@ -80,6 +79,7 @@ export default function RegisterPage() {
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [idToDelete, setIdToDelete] = useState<number | null>(null);
+
   const [newEvent, setNewEvent] = useState<Event>({
     title: "",
     start: "",
@@ -107,19 +107,17 @@ export default function RegisterPage() {
     //アイコン表示
     const getMotivation = async () => {
       const data = await showMotivation();
-      console.log(data);
 
       // 例: dataは配列で、各要素が{value: "happy", ...}のような形であると仮定
       const eventWithIcons = data.map(
-        (item: { value: string; created_at: string }, index: number) => ({
+        (item: { value: string; display_date: string }, index: number) => ({
           id: index,
           title: item.value,
-          start: item.created_at, // 開始日を現在の日付に設定
+          start: item.display_date, // 開始日を選択した日付に設定
           allDay: true, // 終日イベントにする
           icon: iconMap[item.value as keyof typeof iconMap], // アイコンをマッピング
         })
       );
-      console.log(eventWithIcons);
 
       setAllEvents((prevEvents) => [...prevEvents, ...eventWithIcons]);
     };
@@ -133,6 +131,7 @@ export default function RegisterPage() {
       allDay: arg.allDay,
       id: new Date().getTime(),
     });
+
     setShowModal(true);
   }
 
@@ -145,6 +144,9 @@ export default function RegisterPage() {
       id: new Date().getTime(),
       icon: selectedValue.label, // ここでアイコンを関連付け
     };
+    //要確認
+    console.log(event);
+    console.log(newEvent);
     setAllEvents([...allEvents, event]);
   }
 
@@ -186,19 +188,17 @@ export default function RegisterPage() {
     if (value) {
       setSelectedValue(value);
     }
-    console.log(value);
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
     const value = selectedValue.value;
-    console.log(value);
 
     // バリデーション
     const today = new Date().toISOString().split("T")[0];
     // 現在のイベントリストから今日のイベントをチェック
     const hasTodayEvent = allEvents.some((event) => {
-      console.log(event);
       const eventDate = new Date(event.start).toISOString().split("T")[0];
       return eventDate === today;
     });
@@ -213,10 +213,15 @@ export default function RegisterPage() {
       if (selectedOption) {
         setSelectedValue(selectedOption);
       }
-      //Supabaseに登録
-      addMotivation(value);
+
+      // 選択した日付を Supabase に送信
+      const displayDate = new Date(newEvent.start).toISOString();
+      console.log(displayDate);
+
+      addMotivation(value, displayDate);
     }
     setShowModal(false);
+
     console.log(selectedValue);
   }
 
