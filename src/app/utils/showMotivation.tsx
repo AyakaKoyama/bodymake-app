@@ -11,9 +11,10 @@ export default async function showMotivation() {
     (d: { created_at: string; display_date: string }) => ({
       ...d,
       createdAtDate: new Date(d.created_at),
-      displayDate: new Date(d.display_date),
+      displayDate: d.display_date ? new Date(d.display_date) : null  // display_dateが存在する場合のみ変換
     })
   );
+
   console.log(formattedData);
 
   return formattedData;

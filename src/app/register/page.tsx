@@ -10,7 +10,7 @@ import bootstrapPlugin from "@fullcalendar/bootstrap";
 import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/20/solid";
-import { EventSourceInput } from "@fullcalendar/core/index.js";
+import { EventSourceInput, formatDate } from "@fullcalendar/core/index.js";
 import {
   LiaDizzy,
   LiaFrown,
@@ -21,6 +21,7 @@ import {
 import SelectBox from "../components/SelectBox";
 import addMotivation from "../utils/AddMotivation";
 import showMotivation from "../utils/showMotivation";
+import deleteMotivation from "../utils/DeleteMotivation";
 import "../globals.css";
 
 interface Event {
@@ -118,8 +119,9 @@ export default function RegisterPage() {
           icon: iconMap[item.value as keyof typeof iconMap], // アイコンをマッピング
         })
       );
-
-      setAllEvents((prevEvents) => [...prevEvents, ...eventWithIcons]);
+      console.log(eventWithIcons);
+      setAllEvents((prevEvents) => [...prevEvents, ...eventWithIcons])
+  
     };
     getMotivation();
   }, []);
@@ -138,7 +140,8 @@ export default function RegisterPage() {
   function addEvent(data: DropArg) {
     const event = {
       ...newEvent,
-      start: data.date.toISOString(),
+      //startがnullになってる(data.date.toISOString())
+      start: newEvent.start,
       title: data.draggedEl.innerText,
       allDay: data.allDay,
       id: new Date().getTime(),
@@ -153,6 +156,8 @@ export default function RegisterPage() {
   function handleDeleteModal(data: { event: { id: string } }) {
     setShowDeleteModal(true);
     setIdToDelete(Number(data.event.id));
+    //Supabaseから削除
+    deleteMotivation(data.event.id);
   }
 
   function handleDelete() {
@@ -195,30 +200,35 @@ export default function RegisterPage() {
 
     const value = selectedValue.value;
 
-    // バリデーション
-    const today = new Date().toISOString().split("T")[0];
-    // 現在のイベントリストから今日のイベントをチェック
-    const hasTodayEvent = allEvents.some((event) => {
-      const eventDate = new Date(event.start).toISOString().split("T")[0];
-      return eventDate === today;
-    });
-    // 今日のイベントが既に登録されている場合はエラーメッセージを表示
-    if (hasTodayEvent) {
-      alert("本日はすでにモチベーションが登録されています。");
-      return;
-    }
-
+   
     if (value) {
       const selectedOption = options.find((option) => option.value === value);
       if (selectedOption) {
         setSelectedValue(selectedOption);
       }
 
-      // 選択した日付を Supabase に送信
-      const displayDate = new Date(newEvent.start).toISOString();
+      // 選択した日付を日本時間に変換
+      const displayDate = new Date(newEvent.start).toLocaleString("ja-JP", {
+        timeZone: "Asia/Tokyo",
+      });
       console.log(displayDate);
+      //allEvents.startがnullになってる
+      console.log(allEvents);
 
-      addMotivation(value, displayDate);
+      // 同じ日時は二回登録不可のバリデーション
+      const hasTodayEvent = allEvents.some(
+        (event) => new Date(event.start).toDateString() === new Date(newEvent.start).toDateString()
+      );
+      console.log(hasTodayEvent);
+
+      if (hasTodayEvent) {
+        alert("この日はすでにモチベーションが登録されています。");
+        return;
+      }else{
+        addMotivation(value, displayDate);
+      }
+
+      
     }
     setShowModal(false);
 
