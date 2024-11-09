@@ -74,11 +74,11 @@ const iconMap: {
 };
 
 export default function RegisterPage() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [events, setEvents] = useState<Event[]>([]);
+ 
   const [allEvents, setAllEvents] = useState<Event[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [idToDelete, setIdToDelete] = useState<number | null>(null);
 
   const [newEvent, setNewEvent] = useState<Event>({
@@ -140,7 +140,7 @@ export default function RegisterPage() {
   function addEvent(data: DropArg) {
     const event = {
       ...newEvent,
-      //startがnullになってる(data.date.toISOString())
+      
       start: newEvent.start,
       title: data.draggedEl.innerText,
       allDay: data.allDay,
@@ -151,7 +151,18 @@ export default function RegisterPage() {
     console.log(event);
     console.log(newEvent);
     setAllEvents([...allEvents, event]);
+
   }
+
+ //イベント登録後にモーダル表示
+  function handleCompleteModal() {
+
+    setShowCompleteModal(true);
+    setTimeout(() => {
+      setShowCompleteModal(false);
+    }, 2000);
+  }
+
 
   function handleDeleteModal(data: { event: { id: string } }) {
     setShowDeleteModal(true);
@@ -180,14 +191,8 @@ export default function RegisterPage() {
     });
     setShowDeleteModal(false);
     setIdToDelete(null);
+    setShowCompleteModal(false);
   }
-
-  // const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-  //   setNewEvent({
-  //     ...newEvent,
-  //     title: e.target.value,
-  //   });
-  // };
 
   function handleSelectChange(value: OptionType | null) {
     if (value) {
@@ -231,6 +236,7 @@ export default function RegisterPage() {
       
     }
     setShowModal(false);
+    handleCompleteModal();
 
     console.log(selectedValue);
   }
@@ -372,6 +378,7 @@ export default function RegisterPage() {
           </div>
         </Dialog>
       </Transition.Root>
+
       <Transition.Root show={showModal} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={setShowModal}>
           <Transition.Child
@@ -420,6 +427,7 @@ export default function RegisterPage() {
                             type="submit"
                             className="mt-3 inline-flex w-full justify-center rounded-md bg-emerald-400 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500 sm:col-start-2 disabled:opacity-25"
                             disabled={selectedValue.value === ""}
+                          
                           >
                             登録
                           </button>
@@ -440,6 +448,54 @@ export default function RegisterPage() {
           </div>
         </Dialog>
       </Transition.Root>
+
+
+      <Transition.Root show={showCompleteModal} as={Fragment}>
+      <Dialog as="div" className="relative z-10" onClose={setShowCompleteModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+      <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-full p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md p-6 bg-white rounded-lg shadow-xl">
+                  <div className="overflow-y-auto max-h-[70vh]">
+                    <div className="mt-3 text-center sm:mt-5">
+                      <Dialog.Title
+                        as="h3"
+                        className="text-lg font-medium leading-6 text-gray-900 mb-4"
+                      >
+                        登録完了！
+                      </Dialog.Title>
+                     
+                    </div>
+                    <div className="text-center mt-4 text-gray-500 text-sm " >素晴らしい一歩です！</div>
+                    <button type="button" className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0" onClick={handleCloseModal}>閉じる</button>
+
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+          </Dialog>
+        </Transition.Root>  
+        
     </>
   );
 }
