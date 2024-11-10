@@ -10,7 +10,7 @@ import bootstrapPlugin from "@fullcalendar/bootstrap";
 import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/20/solid";
-import { EventSourceInput, formatDate } from "@fullcalendar/core/index.js";
+import { EventSourceInput} from "@fullcalendar/core/index.js";
 import {
   LiaDizzy,
   LiaFrown,
