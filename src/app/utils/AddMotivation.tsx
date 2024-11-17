@@ -1,5 +1,6 @@
 //データ挿入処理
 export default async function AddMotivation(
+  
   value: string,
   displayDate: string
 ) {
@@ -10,7 +11,7 @@ export default async function AddMotivation(
       "Content-Type": "application/json",
     },
 
-    body: JSON.stringify({ value, display_date: displayDate }),
+    body: JSON.stringify({value, display_date: displayDate }),
   });
   console.log(res);
   const data = await res.json();
@@ -18,5 +19,8 @@ export default async function AddMotivation(
   if (res.status !== 200) {
     throw new Error(data.error ? data.error : "Something went wrong.");
   }
-  return data;
+  // 挿入後に生成されたIDを返す
+  console.log("Inserted data ID:", data.id);
+  return data.id;
+
 }

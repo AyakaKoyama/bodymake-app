@@ -14,14 +14,15 @@ export default async function handler(
     try {
       const { data, error } = await supabase
         .from("motivation_bodymake")
-        .insert([{ value, display_date }]);
-
+        .insert([{value, display_date }])
+        .select(`id`)
+        .single();
       if (error) {
         return res.status(500).json({ error: error.message });
       }
 
       // 挿入したデータを返す
-      return res.status(200).json({ data: data ? data[0] : null });
+      return res.status(200).json({ id: data.id });
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       // エラーハンドリング

@@ -10,6 +10,7 @@ import bootstrapPlugin from "@fullcalendar/bootstrap";
 import { Fragment, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/20/solid";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import { EventSourceInput} from "@fullcalendar/core/index.js";
 import {
   LiaDizzy,
@@ -109,19 +110,18 @@ export default function RegisterPage() {
     const getMotivation = async () => {
       const data = await showMotivation();
 
-      // 例: dataは配列で、各要素が{value: "happy", ...}のような形であると仮定
       const eventWithIcons = data.map(
-        (item: { value: string; display_date: string }, index: number) => ({
-          id: index,
+        (item: { value: string; display_date: string, id: number }) => ({
+          id: item.id, // Supabaseで生成されたIDをそのまま使用
           title: item.value,
           start: item.display_date, // 開始日を選択した日付に設定
           allDay: true, // 終日イベントにする
           icon: iconMap[item.value as keyof typeof iconMap], // アイコンをマッピング
         })
       );
-      console.log(eventWithIcons);
+      console.log("Events with IDs from Supabase:", eventWithIcons);
       setAllEvents((prevEvents) => [...prevEvents, ...eventWithIcons])
-  
+   
     };
     getMotivation();
   }, []);
@@ -136,7 +136,70 @@ export default function RegisterPage() {
 
     setShowModal(true);
   }
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
 
+    const value = selectedValue.value;
+    //allEventsのidを取得
+    const id = newEvent.id;
+    if(id === undefined){
+      alert("idが取得できません。");
+      return;
+    }
+    console.log(id);
+
+   
+    if (value) {
+      const selectedOption = options.find((option) => option.value === value);
+      if (selectedOption) {
+        setSelectedValue(selectedOption);
+      }
+
+      // 選択した日付を日本時間に変換
+      const displayDate = new Date(newEvent.start).toLocaleString("ja-JP", {
+        timeZone: "Asia/Tokyo",
+      });
+      
+
+      // 同じ日時は二回登録不可のバリデーション
+      const hasTodayEvent = allEvents.some(
+        (event) => new Date(event.start).toDateString() === new Date(newEvent.start).toDateString()
+      );
+      console.log(hasTodayEvent);
+
+      if (hasTodayEvent) {
+        alert("この日はすでにモチベーションが登録されています。");
+        return;
+      }else{
+        addMotivation(value, displayDate).then((newId) => {
+          console.log("Generated ID from API:", newId);
+          if (newId) {
+            // SupabaseのIDを新しいイベントIDとして使用
+            const event = {
+              ...newEvent,
+              id: newId, // Supabaseで生成されたIDを設定
+              icon: selectedValue.label,
+            };
+            console.log(event);
+            console.log("event.id:", event.id);
+            setAllEvents([...allEvents, event]);
+            setShowModal(false);
+            handleCompleteModal();
+          } else {
+            alert("モチベーションを追加できませんでした。");
+          }
+        });
+      }
+
+      
+    }
+    setShowModal(false);
+    handleCompleteModal();
+
+    console.log(selectedValue);
+  }
+
+  //、handleSubmit で保存されたデータをもとにイベントを追加する
   function addEvent(data: DropArg) {
     const event = {
       ...newEvent,
@@ -147,8 +210,7 @@ export default function RegisterPage() {
       id: new Date().getTime(),
       icon: selectedValue.label, // ここでアイコンを関連付け
     };
-    //要確認
-    console.log(event);
+   
     console.log(newEvent);
     setAllEvents([...allEvents, event]);
 
@@ -166,17 +228,30 @@ export default function RegisterPage() {
 
   function handleDeleteModal(data: { event: { id: string } }) {
     setShowDeleteModal(true);
-    setIdToDelete(Number(data.event.id));
+    //登録したidを取得
+   // IDを取得
+   const id = parseInt(data.event.id);  // 文字列をnumberに変換
+    if(isNaN(id)){
+      alert("idが取得できません。");
+      return;
+    }
+    setIdToDelete(id);
+    console.log("ID to delete:", id);
     //Supabaseから削除
-    deleteMotivation(data.event.id);
+    deleteMotivation(id.toString());
   }
 
   function handleDelete() {
-    setAllEvents(
-      allEvents.filter((event) => Number(event.id) !== Number(idToDelete))
-    );
-    setShowDeleteModal(false);
-    setIdToDelete(null);
+    if (idToDelete === null) {
+      alert("削除するIDが指定されていません。");
+      return;
+    }
+  
+    deleteMotivation(idToDelete.toString()).then(() => {
+      setAllEvents(allEvents.filter((event) => event.id !== idToDelete));
+      setShowDeleteModal(false);
+      setIdToDelete(null);
+    });
   }
 
   function handleCloseModal() {
@@ -200,46 +275,7 @@ export default function RegisterPage() {
     }
   }
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-
-    const value = selectedValue.value;
-
-   
-    if (value) {
-      const selectedOption = options.find((option) => option.value === value);
-      if (selectedOption) {
-        setSelectedValue(selectedOption);
-      }
-
-      // 選択した日付を日本時間に変換
-      const displayDate = new Date(newEvent.start).toLocaleString("ja-JP", {
-        timeZone: "Asia/Tokyo",
-      });
-      console.log(displayDate);
-      //allEvents.startがnullになってる
-      console.log(allEvents);
-
-      // 同じ日時は二回登録不可のバリデーション
-      const hasTodayEvent = allEvents.some(
-        (event) => new Date(event.start).toDateString() === new Date(newEvent.start).toDateString()
-      );
-      console.log(hasTodayEvent);
-
-      if (hasTodayEvent) {
-        alert("この日はすでにモチベーションが登録されています。");
-        return;
-      }else{
-        addMotivation(value, displayDate);
-      }
-
-      
-    }
-    setShowModal(false);
-    handleCompleteModal();
-
-    console.log(selectedValue);
-  }
+ 
 
   // カレンダーのレンダリング時にアイコンを表示
   const renderEventContent = (eventInfo: {
@@ -476,6 +512,15 @@ export default function RegisterPage() {
               >
                 <Dialog.Panel className="w-full max-w-md p-6 bg-white rounded-lg shadow-xl">
                   <div className="overflow-y-auto max-h-[70vh]">
+                  <div
+                        className="mx-auto flex h-24 w-24 flex-shrink-0 items-center 
+                        justify-center rounded-full bg-emerald-100 sm:mx-0 sm:h-10 sm:w-10"
+                      >
+                        <CheckCircleIcon
+                          className=" h-30 w-30 text-emerald-300"
+                          aria-hidden="true"
+                        />
+                      </div>
                     <div className="mt-3 text-center sm:mt-5">
                       <Dialog.Title
                         as="h3"
